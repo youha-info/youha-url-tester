@@ -1,0 +1,9 @@
+name: "URL Tester"
+description: "SRE - URL Tester"
+author: "youngjun-youha"
+outputs:
+  warnings:
+    description: "warning"
+runs:
+  using: "docker"
+  image: "Dockerfile"
