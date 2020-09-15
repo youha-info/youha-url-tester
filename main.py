@@ -5,16 +5,14 @@ import sys
 import boto3
 import requests
 
-OK_EMOJI = ":white_check_mark:"
-FAIL_EMOJI = ":no_entry_sign:"
-BLOCK_QUOTE = ">"
+OK_TEXT = "OK"
+FAIL_TEXT = "FAIL"
 AUTH_PREFIX = "Bearer "
 
 
 def main():
     base_url = os.environ.get("INPUT_BASE_URL", None)
     target_uris = get_uris_from_comma_separated(os.environ.get("INPUT_URIS", None))
-    slack_webhook_url = os.environ.get("INPUT_SLACK_WEB_HOOK", None)
     user_pool_id = os.environ.get("INPUT_USER_POOL_ID", None)
     app_client_id = os.environ.get("INPUT_APP_CLIENT_ID", None)
     test_user_id = os.environ.get("INPUT_TEST_USER_ID", None)
@@ -22,16 +20,22 @@ def main():
 
     auth_token = authenticate_and_get_token(test_user_id, test_user_password, user_pool_id, app_client_id)
 
-    webhook_text = "URL testing is done\n"
+    result_message = "URL testing is done\n"
+    is_all_pass = True
 
     for uri in target_uris:
         url = f"{base_url}{uri}"
         status_code = test_url(url, auth_token)
-        webhook_text = write_message(url, status_code, webhook_text)
+        if status_code != 200:
+            is_all_pass = False
+        result_message = write_message(url, status_code, result_message)
 
-    post_to_slack(webhook_text, slack_webhook_url)
+    write_message_to_stdout(result_message)
 
-    sys.exit(0)
+    if is_all_pass:
+        sys.exit(0)
+    else:
+        sys.exit(1)
 
 
 def get_uris_from_comma_separated(uris):
@@ -49,23 +53,18 @@ def get_uris_from_comma_separated(uris):
     return arr_uris
 
 
-def write_message(url, status_code, webhook_text):
-    webhook_text += f"{BLOCK_QUOTE} {url}\t`{status_code}`\t"
+def write_message(url, status_code, message_text):
+    message_text += f"{url}\t{status_code}\t"
     if status_code == 200:
-        webhook_text += OK_EMOJI
+        message_text += OK_TEXT
     else:
-        webhook_text += FAIL_EMOJI
-    webhook_text += "\n"
-    return webhook_text
+        message_text += FAIL_TEXT
+    message_text += "\n"
+    return message_text
 
 
-def post_to_slack(webhook_text, webhook_url):
-    requests.post(
-        webhook_url, data=json.dumps({
-            "text": webhook_text
-        }),
-        headers={'Content-Type': 'application/json'}
-    )
+def write_message_to_stdout(result_message):
+    print(f"::set-output name=message::{result_message}")
 
 
 def authenticate_and_get_token(username: str, password: str,
@@ -94,7 +93,7 @@ def test_url(url, auth_token):
         url=url,
         headers={'authorization': auth_token} if auth_token else None,
     )
-    sys.stdout.write(f"::debug::{url} - {response.status_code}\n")
+    print(f"::debug::{url} - {response.status_code}\n")
     return response.status_code
 
 
