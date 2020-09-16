@@ -2,8 +2,8 @@ name: "URL Tester"
 description: "SRE - URL Tester"
 author: "youngjun-youha"
 outputs:
-  warnings:
-    description: "warning"
+  message:
+    description: "result message. ex) https://test.net - 200 OK"
 runs:
   using: "docker"
   image: "Dockerfile"
