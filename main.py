@@ -81,8 +81,11 @@ def authenticate_and_get_token(username: str, password: str,
                 "PASSWORD": password
             }
         )
-        auth_token = f"{AUTH_PREFIX} {resp['AuthenticationResult']['AccessToken']}"
+        print(f"::set-output name=token_res::{resp['AuthenticationResult']}")
+        auth_token = f"{AUTH_PREFIX} {resp['AuthenticationResult']['IdToken']}"
+        print(f"::set-output name=token::{auth_token}")
     except Exception as e:
+        print(f"::set-output name=error::{e}")
         pass
     return auth_token
 
