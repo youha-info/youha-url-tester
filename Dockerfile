@@ -2,7 +2,7 @@ FROM python:3-slim AS builder
 ADD . /app
 WORKDIR /app
 
-RUN pip install --target=/app requests boto3
+RUN pip install --target=/app requests boto3 pycognito
 
 FROM gcr.io/distroless/python3-debian10
 COPY --from=builder /app /app

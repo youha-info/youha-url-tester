@@ -1,9 +1,9 @@
-import json
 import os
 import sys
 
 import boto3
 import requests
+import pycognito
 
 OK_TEXT = "OK"
 FAIL_TEXT = "FAIL"
@@ -17,8 +17,10 @@ def main():
     app_client_id = os.environ.get("INPUT_APP_CLIENT_ID", None)
     test_user_id = os.environ.get("INPUT_TEST_USER_ID", None)
     test_user_password = os.environ.get("INPUT_TEST_USER_PASSWORD", None)
+    aws_region = os.environ.get("AWS_DEFAULT_REGION", None)
 
-    auth_token = authenticate_and_get_token(test_user_id, test_user_password, user_pool_id, app_client_id)
+    auth_token = authenticate_and_get_token(
+        test_user_id, test_user_password, user_pool_id, app_client_id, aws_region)
 
     result_message = "URL testing is done\n"
     is_all_pass = True
@@ -68,21 +70,21 @@ def write_message_to_stdout(result_message):
 
 
 def authenticate_and_get_token(username: str, password: str,
-                               user_pool_id: str, app_client_id: str):
+                               user_pool_id: str, client_id: str,
+                               aws_region: str = "ap-northeast-2"):
     auth_token = None
     try:
-        client = boto3.client('cognito-idp')
-        resp = client.admin_initiate_auth(
-            UserPoolId=user_pool_id,
-            ClientId=app_client_id,
-            AuthFlow='ADMIN_NO_SRP_AUTH',
-            AuthParameters={
-                "USERNAME": username,
-                "PASSWORD": password
-            }
-        )
-        auth_token = f"{AUTH_PREFIX} {resp['AuthenticationResult']['AccessToken']}"
+        cognito = boto3.client('cognito-idp', region_name=aws_region)
+        aws = pycognito.AWSSRP(
+            username=username,
+            password=password,
+            pool_id=user_pool_id,
+            client_id=client_id,
+            client=cognito)
+        tokens = aws.authenticate_user()
+        auth_token = f"{AUTH_PREFIX} {tokens['AuthenticationResult']['IdToken']}"
     except Exception as e:
+        print(e)
         pass
     return auth_token
 
