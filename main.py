@@ -17,7 +17,7 @@ def main():
     app_client_id = os.environ.get("INPUT_APP_CLIENT_ID", None)
     test_user_id = os.environ.get("INPUT_TEST_USER_ID", None)
     test_user_password = os.environ.get("INPUT_TEST_USER_PASSWORD", None)
-    aws_region = os.environ.get("AWS_DEFAULT_REGION", None)
+    aws_region = os.environ.get("AWS_DEFAULT_REGION", "ap-northeast-2")
 
     auth_token = authenticate_and_get_token(
         test_user_id, test_user_password, user_pool_id, app_client_id, aws_region)
@@ -71,7 +71,7 @@ def write_message_to_stdout(result_message):
 
 def authenticate_and_get_token(username: str, password: str,
                                user_pool_id: str, client_id: str,
-                               aws_region: str = "ap-northeast-2"):
+                               aws_region: str):
     auth_token = None
     try:
         cognito = boto3.client('cognito-idp', region_name=aws_region)
