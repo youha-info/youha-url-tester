@@ -10,6 +10,7 @@
         INPUT_APP_CLIENT_ID: "AWS app client ID"
         INPUT_TEST_USER_ID: "testuser@test.net"
         INPUT_TEST_USER_PASSWORD: "your_password"
+        AWS_DEFAULT_REGION: "ap-northeast-2"
     if: ${{ always() }}
 ```
 
@@ -28,5 +29,6 @@
         INPUT_APP_CLIENT_ID: ${{ secrets.INPUT_APP_CLIENT_ID }}
         INPUT_TEST_USER_ID: ${{ secrets.INPUT_TEST_USER_ID }}
         INPUT_TEST_USER_PASSWORD: ${{ secrets.INPUT_TEST_USER_PASSWORD }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
     if: ${{ always() }}
 ```
