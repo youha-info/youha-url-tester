@@ -28,7 +28,7 @@ def main():
     for uri in target_uris:
         url = f"{base_url}{uri}"
         status_code = test_url(url, auth_token)
-        if status_code != 200:
+        if status_code != 200 or status_code != 403:
             is_all_pass = False
         result_message = write_message(url, status_code, result_message)
 
@@ -57,7 +57,7 @@ def get_uris_from_comma_separated(uris):
 
 def write_message(url, status_code, message_text):
     message_text += f"{url}\t{status_code}\t"
-    if status_code == 200:
+    if status_code == 200 or status_code == 403:
         message_text += OK_TEXT
     else:
         message_text += FAIL_TEXT
