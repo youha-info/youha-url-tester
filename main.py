@@ -28,10 +28,14 @@ def main():
     for uri in target_uris:
         url = f"{base_url}{uri}"
         status_code = test_url(url, auth_token)
-        if status_code != 200 or status_code != 403:
+
+        if not (status_code == 200 or status_code == 403):
             is_all_pass = False
+        
         result_message = write_message(url, status_code, result_message)
 
+        
+        
     write_message_to_stdout(result_message)
 
     if is_all_pass:
